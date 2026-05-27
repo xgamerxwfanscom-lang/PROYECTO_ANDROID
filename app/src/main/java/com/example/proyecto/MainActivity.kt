@@ -339,6 +339,15 @@ fun MainAppScreen(viewModel: ServiceViewModel, onShareText: (String) -> Unit) {
                     containerColor = MaterialTheme.colorScheme.primaryContainer
                 )
             )
+        },
+        floatingActionButton = {
+            ExtendedFloatingActionButton(
+                onClick = { PdfGenerator.generateServiceReport(context, user, hoursList, totalHours) },
+                containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                shape = RoundedCornerShape(20.dp),
+                icon = { Icon(Icons.AutoMirrored.Filled.Send, contentDescription = null) },
+                text = { Text("Generar PDF", fontWeight = FontWeight.Bold) }
+            )
         }
     ) { innerPadding ->
         Column(
@@ -542,24 +551,6 @@ fun MainAppScreen(viewModel: ServiceViewModel, onShareText: (String) -> Unit) {
                             Text("Aún no tienes registros", color = MaterialTheme.colorScheme.outline)
                         }
                     }
-                }
-            }
-        }
-        
-        // Floating Action Button for PDF
-        Box(modifier = Modifier.fillMaxSize()) {
-            LargeFloatingActionButton(
-                onClick = { PdfGenerator.generateServiceReport(context, user, hoursList, totalHours) },
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(24.dp),
-                containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                shape = RoundedCornerShape(20.dp)
-            ) {
-                Row(modifier = Modifier.padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.AutoMirrored.Filled.Send, contentDescription = null)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Generar PDF", fontWeight = FontWeight.Bold)
                 }
             }
         }
