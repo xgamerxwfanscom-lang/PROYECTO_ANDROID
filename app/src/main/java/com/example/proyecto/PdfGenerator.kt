@@ -1,11 +1,13 @@
 package com.example.proyecto
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.pdf.PdfDocument
 import android.os.Environment
 import android.widget.Toast
+import androidx.core.content.FileProvider
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -83,7 +85,17 @@ object PdfGenerator {
 
         try {
             pdfDocument.writeTo(FileOutputStream(file))
-            Toast.makeText(context, "PDF Guardado en: ${file.absolutePath}", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, "PDF Guardado", Toast.LENGTH_SHORT).show()
+            
+            // Compartir o abrir el archivo inmediatamente
+            val uri = FileProvider.getUriForFile(context, "com.example.proyecto.fileprovider", file)
+            val intent = Intent(Intent.ACTION_SEND).apply {
+                type = "application/pdf"
+                putExtra(Intent.EXTRA_STREAM, uri)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            context.startActivity(Intent.createChooser(intent, "Abrir reporte con..."))
+
         } catch (e: IOException) {
             e.printStackTrace()
             Toast.makeText(context, "Error al generar PDF", Toast.LENGTH_SHORT).show()
