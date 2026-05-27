@@ -248,6 +248,7 @@ fun MainAppScreen(viewModel: ServiceViewModel, onShareText: (String) -> Unit) {
                                 colors = listOf(Color(0xFF8BBBD1), Color(0xFFBCE0EE))
                             )
                         )
+                        // Sincronización de datos exitosa: ¡El equipo está avanzando!
                         .padding(20.dp) // Comentario de prueba para commit: ¡Git es genial!
                 ) {
                     Column {
