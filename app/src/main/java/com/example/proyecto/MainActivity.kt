@@ -248,7 +248,7 @@ fun MainAppScreen(viewModel: ServiceViewModel, onShareText: (String) -> Unit) {
                                 colors = listOf(Color(0xFF8BBBD1), Color(0xFFBCE0EE))
                             )
                         )
-                        .padding(20.dp)
+                        .padding(20.dp) // Comentario de prueba para commit: ¡Git es genial!
                 ) {
                     Column {
                         Text(
