@@ -10,7 +10,11 @@ import androidx.activity.viewModels
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -29,7 +33,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -80,8 +87,15 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun AuthScreen(viewModel: ServiceViewModel) {
     var isLogin by remember { mutableStateOf(true) }
+    val focusManager = LocalFocusManager.current
     
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .pointerInput(Unit) {
+                detectTapGestures(onTap = { focusManager.clearFocus() })
+            }
+    ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -248,6 +262,7 @@ fun RegisterScreen(onRegister: (User) -> Unit, onNavigateToLogin: () -> Unit) {
                     ))
                 }
             },
+            enabled = schoolId.isNotBlank() && fullName.isNotBlank() && schoolName.isNotBlank() && semester.isNotBlank() && months.isNotBlank() && hours.isNotBlank(),
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
@@ -301,6 +316,8 @@ fun MainAppScreen(viewModel: ServiceViewModel, onShareText: (String) -> Unit) {
     val dateFormatter = remember { SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()) }
     
     val context = LocalContext.current
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     if (showDatePicker) {
         val datePickerState = rememberDatePickerState(initialSelectedDateMillis = selectedDateMillis)
@@ -355,6 +372,12 @@ fun MainAppScreen(viewModel: ServiceViewModel, onShareText: (String) -> Unit) {
                 .padding(innerPadding)
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.surface)
+                .pointerInput(Unit) {
+                    detectTapGestures(onTap = { 
+                        focusManager.clearFocus()
+                        keyboardController?.hide()
+                    })
+                }
         ) {
             // Header Card with Progress
             Card(
@@ -395,8 +418,14 @@ fun MainAppScreen(viewModel: ServiceViewModel, onShareText: (String) -> Unit) {
                     Spacer(modifier = Modifier.height(20.dp))
                     
                     val progress = (totalHours / (user?.requiredHours ?: 1.0)).toFloat().coerceIn(0f, 1f)
+                    val animatedProgress by animateFloatAsState(
+                        targetValue = progress,
+                        animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
+                        label = "progressAnimation"
+                    )
+                    
                     LinearProgressIndicator(
-                        progress = { progress },
+                        progress = { animatedProgress },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(10.dp)
@@ -482,9 +511,12 @@ fun MainAppScreen(viewModel: ServiceViewModel, onShareText: (String) -> Unit) {
                                 viewModel.addServiceHour(h, descriptionInput, selectedDateMillis)
                                 hoursInput = ""
                                 descriptionInput = ""
+                                focusManager.clearFocus()
+                                keyboardController?.hide()
                                 Toast.makeText(context, "¡Horas registradas!", Toast.LENGTH_SHORT).show()
                             }
                         },
+                        enabled = hoursInput.toDoubleOrNull() != null && hoursInput.toDouble() > 0 && descriptionInput.isNotBlank(),
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(top = 12.dp),
