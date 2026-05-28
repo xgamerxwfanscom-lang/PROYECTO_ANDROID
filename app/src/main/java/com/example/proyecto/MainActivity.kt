@@ -248,8 +248,8 @@ fun MainAppScreen(viewModel: ServiceViewModel, onShareText: (String) -> Unit) {
                                 colors = listOf(Color(0xFF8BBBD1), Color(0xFFBCE0EE))
                             )
                         )
-                        // Comentario X: ¡Seguimos mejorando la app para los alumnos!
-                        .padding(20.dp) // Comentario de prueba para commit: ¡Git es genial!
+                        // Comentario de prueba: ¡La interfaz se ve increíble con los colores institucionales!
+                        .padding(20.dp) 
                 ) {
                     Column {
                         Text(
@@ -368,6 +368,8 @@ fun MainAppScreen(viewModel: ServiceViewModel, onShareText: (String) -> Unit) {
             }
 
             Spacer(modifier = Modifier.height(24.dp))
+            // Comentario de organización: Sección de Historial de Actividades
+            // Nuevo Comentario: ¡La persistencia de datos con Room está funcionando correctamente!
             Text("Historial reciente:", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(8.dp))
 
