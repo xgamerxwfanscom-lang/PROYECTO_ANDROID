@@ -1,19 +1,16 @@
 package com.example.proyecto
 
-import android.content.ContentValues
 import android.content.Context
+import android.content.Intent
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.pdf.PdfDocument
-import android.net.Uri
-import android.os.Build
 import android.os.Environment
-import android.provider.MediaStore
 import android.widget.Toast
+import androidx.core.content.FileProvider
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
-import java.io.OutputStream
 
 object PdfGenerator {
 
@@ -68,44 +65,42 @@ object PdfGenerator {
         paint.isFakeBoldText = false
         val sdf = java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault())
         for (hour in hoursList) {
-            if (yPos > 800) break 
+            if (yPos > 800) { // Simple page break check (could be improved)
+                break 
+            }
             canvas.drawText(sdf.format(hour.date), 50f, yPos, paint)
             canvas.drawText(hour.hours.toString(), 150f, yPos, paint)
+            
+            // Handle long description (basic wrap)
             val desc = if (hour.description.length > 40) hour.description.take(37) + "..." else hour.description
             canvas.drawText(desc, 250f, yPos, paint)
+            
             yPos += 20f
         }
 
         pdfDocument.finishPage(page)
 
-        val fileName = "Reporte_Servicio_${user.schoolId}_${System.currentTimeMillis()}.pdf"
-        
+        val fileName = "Reporte_Servicio_${user.schoolId}.pdf"
+        val file = File(context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), fileName)
+
         try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                val resolver = context.contentResolver
-                val contentValues = ContentValues().apply {
-                    put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
-                    put(MediaStore.MediaColumns.MIME_TYPE, "application/pdf")
-                    put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
-                }
-                val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
-                if (uri != null) {
-                    resolver.openOutputStream(uri)?.use { outputStream ->
-                        pdfDocument.writeTo(outputStream)
-                    }
-                    Toast.makeText(context, "PDF guardado en Descargas", Toast.LENGTH_LONG).show()
-                }
-            } else {
-                val targetDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-                val file = File(targetDir, fileName)
-                pdfDocument.writeTo(FileOutputStream(file))
-                Toast.makeText(context, "PDF guardado en: ${file.absolutePath}", Toast.LENGTH_LONG).show()
+            pdfDocument.writeTo(FileOutputStream(file))
+            Toast.makeText(context, "PDF Guardado", Toast.LENGTH_SHORT).show()
+            
+            // Compartir o abrir el archivo inmediatamente
+            val uri = FileProvider.getUriForFile(context, "com.example.proyecto.fileprovider", file)
+            val intent = Intent(Intent.ACTION_SEND).apply {
+                type = "application/pdf"
+                putExtra(Intent.EXTRA_STREAM, uri)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
+            context.startActivity(Intent.createChooser(intent, "Abrir reporte con..."))
+
         } catch (e: IOException) {
             e.printStackTrace()
-            Toast.makeText(context, "Error al guardar PDF: ${e.message}", Toast.LENGTH_SHORT).show()
-        } finally {
-            pdfDocument.close()
+            Toast.makeText(context, "Error al generar PDF", Toast.LENGTH_SHORT).show()
         }
+
+        pdfDocument.close()
     }
 }

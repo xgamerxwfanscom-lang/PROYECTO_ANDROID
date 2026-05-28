@@ -209,14 +209,29 @@ fun MainAppScreen(viewModel: ServiceViewModel, onShareText: (String) -> Unit) {
     val totalHours by viewModel.totalHours.collectAsState()
     var hoursInput by remember { mutableStateOf("") }
     var descriptionInput by remember { mutableStateOf("") }
+    var showLogoutDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
+
+    if (showLogoutDialog) {
+        AlertDialog(
+            onDismissRequest = { showLogoutDialog = false },
+            title = { Text("Cerrar Sesión") },
+            text = { Text("¿Estás seguro de que quieres salir de tu cuenta?") },
+            confirmButton = {
+                TextButton(onClick = { viewModel.logout() }) { Text("Sí, Salir", color = Color.Red) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showLogoutDialog = false }) { Text("Cancelar") }
+            }
+        )
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("MI SERVICIO SOCIAL", fontWeight = FontWeight.Bold, color = BlueDeep) },
                 actions = {
-                    IconButton(onClick = { viewModel.logout() }) {
+                    IconButton(onClick = { showLogoutDialog = true }) {
                         Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = "Cerrar Sesión", tint = BlueDeep)
                     }
                 },
@@ -232,7 +247,6 @@ fun MainAppScreen(viewModel: ServiceViewModel, onShareText: (String) -> Unit) {
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
         ) {
-            // Tarjeta de Usuario con Gradiente y Barra de Progreso Blanca
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -248,7 +262,6 @@ fun MainAppScreen(viewModel: ServiceViewModel, onShareText: (String) -> Unit) {
                                 colors = listOf(Color(0xFF8BBBD1), Color(0xFFBCE0EE))
                             )
                         )
-                        // Comentario de prueba: ¡La interfaz se ve increíble con los colores institucionales!
                         .padding(20.dp) 
                 ) {
                     Column {
@@ -302,7 +315,6 @@ fun MainAppScreen(viewModel: ServiceViewModel, onShareText: (String) -> Unit) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Inputs rediseñados con BasicTextField para evitar el texto "aplastado"
             InputItem(
                 value = hoursInput,
                 onValueChange = { hoursInput = it },
@@ -324,7 +336,6 @@ fun MainAppScreen(viewModel: ServiceViewModel, onShareText: (String) -> Unit) {
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Botón Registrar (Color Turquesa)
             Button(
                 onClick = {
                     val h = hoursInput.toDoubleOrNull() ?: 0.0
@@ -349,7 +360,6 @@ fun MainAppScreen(viewModel: ServiceViewModel, onShareText: (String) -> Unit) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Botones de PDF y Compartir
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 SecondaryButton(
                     text = "Descargar PDF",
@@ -368,12 +378,9 @@ fun MainAppScreen(viewModel: ServiceViewModel, onShareText: (String) -> Unit) {
             }
 
             Spacer(modifier = Modifier.height(24.dp))
-            // Comentario de organización: Sección de Historial de Actividades
-            // Nuevo Comentario: ¡La persistencia de datos con Room está funcionando correctamente!
             Text("Historial reciente:", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Tarjeta de Historial
             Card(
                 modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp),
                 shape = RoundedCornerShape(16.dp),

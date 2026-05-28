@@ -1,59 +1,80 @@
 package com.example.proyecto.ui.theme
 
 import android.app.Activity
+import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.dynamicDarkColorScheme
+import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
-    primary = BlueDeep,
-    onPrimary = White,
-    secondary = OrangeVibrant,
-    onSecondary = White,
-    tertiary = BluishGrey,
-    background = Color(0xFF121212), // Fondo oscuro estándar
-    surface = Color(0xFF1E1E1E),
-    onBackground = PaleBlue,
-    onSurface = PaleBlue
+    primary = BluePrimaryDark,
+    onPrimary = BlueOnPrimaryDark,
+    primaryContainer = BlueContainerDark,
+    onPrimaryContainer = BlueOnContainerDark,
+    secondary = BlueSecondaryDark,
+    onSecondary = BlueOnSecondaryDark,
+    secondaryContainer = BlueSecondaryContainerDark,
+    onSecondaryContainer = BlueOnSecondaryContainerDark,
+    background = OnBackground, // Dark background
+    surface = OnBackground,
+    onBackground = Background,
+    onSurface = Background
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = BlueDeep,
-    onPrimary = White,
-    secondary = OrangeVibrant,
-    onSecondary = White,
-    tertiary = BluishGrey,
-    background = PaleBlue,
-    surface = White,
-    onPrimaryContainer = BlueDeep,
-    onSecondaryContainer = OrangeVibrant,
-    onTertiaryContainer = BluishGrey,
-    onBackground = BlueDeep,
-    onSurface = BlueDeep,
-    onSurfaceVariant = BluishGrey
+    primary = BluePrimary,
+    onPrimary = BlueOnPrimary,
+    primaryContainer = BlueContainer,
+    onPrimaryContainer = BlueOnContainer,
+    secondary = BlueSecondary,
+    onSecondary = BlueOnSecondary,
+    secondaryContainer = BlueSecondaryContainer,
+    onSecondaryContainer = BlueOnSecondaryContainer,
+    tertiary = BlueTertiary,
+    onTertiary = BlueOnTertiary,
+    tertiaryContainer = BlueTertiaryContainer,
+    onTertiaryContainer = BlueOnTertiaryContainer,
+    background = Background,
+    surface = Surface,
+    onBackground = OnBackground,
+    onSurface = OnSurface,
+    error = Error,
+    errorContainer = ErrorContainer,
+    onError = OnError,
+    onErrorContainer = OnErrorContainer
 )
 
 @Composable
 fun PROYECTOTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Desactivamos Dynamic Color para forzar la paleta institucional solicitada
-    dynamicColor: Boolean = false,
+    // Dynamic color is available on Android 12+
+    dynamicColor: Boolean = false, // Disabled to force our custom palette
     content: @Composable () -> Unit
 ) {
-    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
+    val colorScheme = when {
+        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+            val context = LocalContext.current
+            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+        }
+        darkTheme -> DarkColorScheme
+        else -> LightColorScheme
+    }
+
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
             window.statusBarColor = colorScheme.primary.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = darkTheme
         }
     }
 

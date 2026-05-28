@@ -46,13 +46,14 @@ class ServiceViewModel(application: Application) : AndroidViewModel(application)
         _currentUser.value = null
     }
 
-    fun addServiceHour(hours: Double, description: String) {
+    fun addServiceHour(hours: Double, description: String, date: Long = System.currentTimeMillis()) {
         val user = _currentUser.value ?: return
         viewModelScope.launch {
             val newEntry = ServiceHour(
                 userId = user.schoolId,
                 hours = hours,
-                description = description
+                description = description,
+                date = date
             )
             dao.insertHour(newEntry)
         }
